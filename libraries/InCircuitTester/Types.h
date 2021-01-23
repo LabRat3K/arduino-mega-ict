@@ -34,7 +34,7 @@
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 
 //                     "0123456789ABCDEF"
-#define BLANK_LINE_16  "*               "
+#define BLANK_LINE_16  "                "
 
 //
 // Error codes.

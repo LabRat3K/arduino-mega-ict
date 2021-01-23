@@ -23,22 +23,66 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "main.h"
-
 #include "Arduino.h"
 #include <MemoryFree.h>
 #include <LiquidCrystal.h>
-#include <DFR_Key.h>
+#include "keypad.h"
 #include <CGameCallback.h>
 
 //
-// Basic LCD diplay object (in this case, Sain 16 x 2).
+// BUILD configuration options
 //
-static LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 //
-// Sain supplied keypad driver.
+// Uncomment to add KEYPAD_TEST to the config menu options
 //
-static DFR_Key keypad;
+// #define KEYPAD_TEST
+
+//
+//  See "keypad.h" to select between DFRobot Keypad, or 'simple GPIO input'
+//     See below for GPIO PIN definitions for inputs, 
+//     as well as for CONTRAST and RW  (could be connected direct to GND)
+//
+
+#ifdef USE_DFR_KEY
+   //
+   // Basic LCD diplay object (in this case, Sain 16 x 2).
+   //
+   const int  rs=8, en=9, d4=5, d5=5, d6=6, d7=7;
+
+   // Function prototype for retrieving keypress token
+   #define readKey() keypad.getKey()
+#else
+   //
+   // Custom LCD configuration - update these pin definitions
+   //
+   const int rs = 12, en = 10, d4 = 9, d5 = 8, d6 = 7, d7 = 6;
+   #define LCD_PIN_CONTRAST (5)
+   #define LCD_PIN_RW       (11)
+
+   // Function prototype for retrieving keypress token
+   int readKey();
+#endif
+static LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+#ifdef USE_DFR_KEY
+   //
+   // Sain supplied keypad driver.
+   //
+   static DFR_Key keypad;
+#else
+   //
+   // Simple GPIO key/poll driver
+   //
+   // List of 5 GPIO pins for data input
+   unsigned char keyMap[5] ={A4,A3,A2,A1,A0};
+
+   // previous key state (defaulted during setup)
+   unsigned char lastKey[5];
+
+   // MAP GPIO pins to KEY function
+   int keyMapv[5]={DOWN_KEY,RIGHT_KEY,UP_KEY, SELECT_KEY, LEFT_KEY};
+#endif
 
 //
 // The single on board LED is used to flash a heartbeat of sorts
@@ -78,14 +122,56 @@ int s_repeatSelectTimeInS;
 bool s_repeatIgnoreError;
 
 //
+// Function pre-declared for keypad_test - useful for first time setup/debugging of Arduino ICT tester
+//
+#ifdef KEYPAD_TEST
+   PERROR keypad_test ( void *context, int  key);
+#endif
+//
 // The selector used for the general tester configuration options.
 //
 static const SELECTOR s_configSelector[] PROGMEM = {//0123456789abcde
                                                     {"- Soak Test    ",  onSelectConfig, (void*) (&s_runSoakTest),           false},
                                                     {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),   false},
                                                     {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),     false},
+#ifdef KEYPAD_TEST
+                                                    {"- Keypad Test  ",  keypad_test, NULL,     false},
+#endif
                                                     { 0, 0 }
                                                    };
+
+//
+// Handler for the Keypad Self-test 
+//
+#ifdef KEYPAD_TEST
+PERROR keypad_test ( void *context, int  key) {
+   PERROR error=errorCustom;
+
+   int inch = NO_KEY;
+   lcd.setCursor(0,1);
+   lcd.print("PRESSED KEY: \x5B \x5D");
+   while (inch != SELECT_KEY) {
+      inch = readKey();
+      lcd.setCursor(14,1);
+      switch (inch) {
+         case NO_KEY:     lcd.write(" ");   break;
+         case LEFT_KEY:   lcd.write("\x7F");break;
+         case RIGHT_KEY:  lcd.write("\x7E");break;
+         case UP_KEY:     lcd.write("^");   break;
+         case DOWN_KEY:   lcd.write("v");   break;
+         case SELECT_KEY: lcd.write("$");   break;
+      }
+
+      // Pause if there is something to see
+      if (inch != NO_KEY) {
+        delay(500);
+      }
+   }
+   errorCustom->code = ERROR_SUCCESS;
+   return error;
+}
+#endif
+
 
 //
 // Handler for the configuration callback to set options.
@@ -327,13 +413,44 @@ onSelectSoakTest(
     return error;
 }
 
+#ifndef USE_DFR_KEY
+// A very simple poll for GPIO's looking for which one is depressed.
+// NOTE: Does NOT support multiple keys at one time (similar to original keypad)
+// Works GREAT with a joystick.
+int readKey() {
+  int i;
+
+  for (i=0;i<5;i++) {
+      int tempK =digitalRead(keyMap[i]);
+      if (lastKey[i] != tempK) {
+          lastKey[i]=tempK;
+          if (tempK==0) {
+             return(keyMapv[i]);
+          }
+      }
+  }
+  return NO_KEY;
+}
+#endif
 
 void mainSetup(
     const SELECTOR *gameSelector
 )
 {
+
+#ifdef LCD_PIN_RW
+    // Setup the RW pins (must occur before lcd.begin
+    pinMode(LCD_PIN_RW,OUTPUT);
+    digitalWrite(LCD_PIN_RW,0);
+#endif
     lcd.begin(16, 2);
     lcd.clear();
+#ifdef LCD_PIN_CONTRAST
+    // Setup the CONTRAST pins - after the CLEAR
+    pinMode(LCD_PIN_CONTRAST,OUTPUT);
+    analogWrite(LCD_PIN_CONTRAST,40);
+#endif
+
     lcd.setCursor(0, 0);
     lcd.print("In Circuit Test");
     pinMode(led, OUTPUT);
@@ -341,7 +458,16 @@ void mainSetup(
 
     delay(2000);
 
+#ifdef USE_DFR_KEY
     keypad.setRate(10);
+#else
+    // Default the GPIO for KEYS to INPUT
+    int i = 0;
+    for (i=0;i<sizeof(keyMap);i++) {
+       pinMode(keyMap[i],INPUT_PULLUP);
+       lastKey[i] = digitalRead(keyMap[i]);
+    }
+#endif
 
     // Copy the PROGMEM based selectors into a single local SRAM selector
     {
@@ -365,7 +491,9 @@ void mainSetup(
     }
 
     s_currentSelector = s_gameSelector;
+
 }
+
 
 void mainLoop()
 {
@@ -373,7 +501,7 @@ void mainLoop()
 
     do {
 
-        int currentKey = keypad.getKey();
+        int currentKey = readKey();
 
         //
         // Special case of the first pass through to park at the first selector.
