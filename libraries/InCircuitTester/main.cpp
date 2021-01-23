@@ -36,7 +36,13 @@
 //
 // Uncomment to add KEYPAD_TEST to the config menu options
 //
-// #define KEYPAD_TEST
+#define KEYPAD_TEST
+
+
+//
+// EYE_CANDY: Uncomment to add "eye candy animation" to the splash screen
+//
+#define EYE_CANDY
 
 //
 //  See "keypad.h" to select between DFRobot Keypad, or 'simple GPIO input'
@@ -433,6 +439,103 @@ int readKey() {
 }
 #endif
 
+#ifdef EYE_CANDY
+// Define custom characters for the LCD
+void splash_page(void) {
+   #define BANNER_LEFT_CHAR byte(0)
+   #define BANNER_RIGHT_CHAR byte(1)
+   //Eye Candy Fun - add animated Invaders to Splash Screen
+   {
+     byte Inv1L[8] = {
+        0b00001,
+        0b00011,
+        0b00111,
+        0b01101,
+        0b01111,
+        0b00010,
+        0b00101,
+        0b01010,
+     };
+     byte Inv1R[8] = {
+        0b10000,
+        0b11000,
+        0b11100,
+        0b10110,
+        0b11110,
+        0b01000,
+        0b10100,
+        0b01010,
+     };
+     byte Inv2L[8] = {
+        0b00001,
+        0b00011,
+        0b00111,
+        0b01101,
+        0b01111,
+        0b00101,
+        0b01000,
+        0b00100,
+     };
+     byte Inv2R[8] = {
+        0b10000,
+        0b11000,
+        0b11100,
+        0b10110,
+        0b11110,
+        0b10100,
+        0b00010,
+        0b00100,
+     };
+
+     lcd.createChar(0,Inv1L);
+     lcd.createChar(1,Inv1R);
+     lcd.createChar(2,Inv2L);
+     lcd.createChar(3,Inv2R);
+   }
+
+   lcd.setCursor(0, 0);
+   lcd.write(BANNER_LEFT_CHAR);
+   lcd.write(BANNER_RIGHT_CHAR);
+   lcd.print("Arduino  ICT");
+   lcd.write(BANNER_LEFT_CHAR);
+   lcd.write(BANNER_RIGHT_CHAR);
+}
+
+void splash_wait(void) {
+   int i =0;
+      // EYE CANDY OPENING
+      lcd.setCursor(0,1);
+      lcd.print(" <PRESS SELECT>");
+      i=0;
+      while (readKey() != SELECT_KEY) {
+         i++;
+         lcd.setCursor(0,0);
+         lcd.write(byte((i%2)*2));
+         lcd.write(byte(((i%2)*2)+1) );
+         lcd.setCursor(14,0);
+         lcd.write(byte((i%2)*2));
+         lcd.write(byte(((i%2)*2)+1));
+         delay(500);
+      }
+}
+#else
+   // 
+   //  No flashy animation (save code space)
+   //
+   #define BANNER_LEFT_CHAR byte(0xDF)
+   #define BANNER_RIGHT_CHAR byte(0xDF)
+
+   void splash_page(void) {
+      lcd.setCursor(0,0);
+      lcd.print("In Circuit Test");
+   }
+
+   void splash_wait(void) {
+      delay(2000);
+   }
+#endif
+
+
 void mainSetup(
     const SELECTOR *gameSelector
 )
@@ -451,12 +554,10 @@ void mainSetup(
     analogWrite(LCD_PIN_CONTRAST,40);
 #endif
 
-    lcd.setCursor(0, 0);
-    lcd.print("In Circuit Test");
+    splash_page();
+
     pinMode(led, OUTPUT);
     digitalWrite(led, LOW);
-
-    delay(2000);
 
 #ifdef USE_DFR_KEY
     keypad.setRate(10);
@@ -492,6 +593,7 @@ void mainSetup(
 
     s_currentSelector = s_gameSelector;
 
+    splash_wait();
 }
 
 
