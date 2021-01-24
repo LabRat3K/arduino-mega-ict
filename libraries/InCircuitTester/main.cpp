@@ -317,7 +317,7 @@ PERROR config_REPEAT( void *context, int  key)
                   break;
 
               case DOWN_KEY:
-                  if (tempVal>5)
+                  if (tempVal>=5)
                       tempVal = tempVal-5;
                   break;
 
@@ -862,8 +862,8 @@ void mainLoop()
                 }
                 while ( (s_repeatIgnoreError || SUCCESS(error)) &&  // Ignoring or no failures
                         (millis() < endTime)                    &&  // Times not up.
-                        (inSelector != s_gameSelector) );           // The input selector wasn't the game selector.
-
+                        (inSelector != s_gameSelector)          &&  // The input selector wasn't the game selector.
+                        (inSelector != s_configSelector) );         // OR the config selector
                 //
                 // The selection may have changed so update the whole display.
                 //
