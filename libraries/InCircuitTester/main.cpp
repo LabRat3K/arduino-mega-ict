@@ -134,6 +134,10 @@ bool s_repeatIgnoreError;
 #ifdef KEYPAD_TEST
    PERROR keypad_test ( void *context, int  key);
 #endif
+
+//
+// Forward Declarations for CONFIG handlers
+//
 PERROR config_SOAK( void *context, int  key);
 PERROR config_REPEAT( void *context, int  key);
 PERROR config_ERROR( void *context, int  key);
@@ -143,9 +147,9 @@ PERROR game_list( void *context, int key);
 // The selector used for the general tester configuration options.
 //
 static const SELECTOR configSelector[] PROGMEM = {//0123456789abcde
-                                                    {"\xA5Soak Test    ",  config_SOAK,   NULL, false},
-                                                    {"\xA5Set Repeat   ",  config_REPEAT, NULL, false},
-                                                    {"\xA5Set Error    ",  config_ERROR,  NULL, false},
+                                                    {"\xA5Soak Test    ",  config_SOAK,   NULL, true},
+                                                    {"\xA5Set Repeat   ",  config_REPEAT, NULL, true},
+                                                    {"\xA5Set Error    ",  config_ERROR,  NULL, true},
 #ifdef KEYPAD_TEST
                                                     {"\xA5Keypad Test  ",  keypad_test,   NULL, false},
 #endif
@@ -159,30 +163,30 @@ static const SELECTOR configSelector[] PROGMEM = {//0123456789abcde
 //
 #ifdef KEYPAD_TEST
 PERROR keypad_test ( void *context, int  key) {
-   PERROR error=errorCustom;
+    PERROR error=errorCustom;
 
-   int inch = NO_KEY;
-   lcd.setCursor(0,1);
-   lcd.print("PRESSED KEY: \x5B \x5D");
-   while (inch != SELECT_KEY) {
-      inch = readKey();
-      lcd.setCursor(14,1);
-      switch (inch) {
-         case NO_KEY:     lcd.write(" ");   break;
-         case LEFT_KEY:   lcd.write("\x7F");break;
-         case RIGHT_KEY:  lcd.write("\x7E");break;
-         case UP_KEY:     lcd.write("^");   break;
-         case DOWN_KEY:   lcd.write("v");   break;
-         case SELECT_KEY: lcd.write("$");   break;
-      }
+    int inch = NO_KEY;
+    lcd.setCursor(0,1);
+    lcd.print("PRESSED KEY: \x5B \x5D");
+    while (inch != SELECT_KEY) {
+       inch = readKey();
+       lcd.setCursor(14,1);
+       switch (inch) {
+          case NO_KEY:     lcd.write(" ");   break;
+          case LEFT_KEY:   lcd.write("\x7F");break;
+          case RIGHT_KEY:  lcd.write("\x7E");break;
+          case UP_KEY:     lcd.write("^");   break;
+          case DOWN_KEY:   lcd.write("v");   break;
+          case SELECT_KEY: lcd.write("$");   break;
+       }
 
-      // Pause if there is something to see
-      if (inch != NO_KEY) {
-        delay(500);
-      }
-   }
-   errorCustom->code = ERROR_SUCCESS;
-   return error;
+       // Pause if there is something to see
+       if (inch != NO_KEY) {
+         delay(500);
+       }
+    }
+    errorCustom->code = ERROR_SUCCESS;
+    return error;
 }
 #endif
 
@@ -192,44 +196,28 @@ PERROR keypad_test ( void *context, int  key) {
 PERROR config_ERROR( void *context, int  key)
 {
     PERROR error = errorCustom;
-    boolean done = false;
-    boolean tempVal = s_repeatIgnoreError;
-    int inch;
 
-	lcd.setCursor(2,1);
-        lcd.print("On Err:");
-        while(done != true) {
-	   lcd.setCursor(10,1);
-           if (tempVal == false) {
-              lcd.print("Ignore");
-           }
-           else {
-              lcd.print("Stop  ");
-           }
-           inch = readKey();
-           switch(inch) {
-              case NO_KEY: break;
-              case RIGHT_KEY:
-              case LEFT_KEY:
-                  done = true;
-                  break;
+    switch(key) {
+       case NO_KEY: break;
+       case RIGHT_KEY:
+       case LEFT_KEY:
+       case SELECT_KEY:
+            break;
 
-              case UP_KEY:
-              case DOWN_KEY:
-                  tempVal = !tempVal;
-                  break;
+       case UP_KEY:
+       case DOWN_KEY:
+            s_repeatIgnoreError = !s_repeatIgnoreError;
+            break;
+    }
 
-              case SELECT_KEY:
-                  s_repeatIgnoreError = tempVal;
-                  done= true;
-                  lcd.setCursor(0,1);
-                  lcd.write('*');
-                  delay(500);
-                  break;
-           }
-        }
+    lcd.setCursor(2,1);
+    if (s_repeatIgnoreError) {
+       lcd.print("On Err: STOP  ");
+    } else {
+       lcd.print("On Err: IGNORE");
+    }
 
-        errorCustom->code = ERROR_SUCCESS;
+    errorCustom->code = ERROR_SUCCESS;
 
     return error;
 }
@@ -240,44 +228,28 @@ PERROR config_ERROR( void *context, int  key)
 PERROR config_SOAK( void *context, int  key)
 {
     PERROR error = errorCustom;
-    boolean done = false;
-    boolean tempVal = s_runSoakTest;
-    int inch;
 
-	lcd.setCursor(2,1);
-        lcd.print("Soak:");
-        while(done != true) {
-	   lcd.setCursor(8,1);
-           if (tempVal == false) {
-              lcd.print("Manual");
-           }
-           else {
-              lcd.print("Auto  ");
-           }
-           inch = readKey();
-           switch(inch) {
-              case NO_KEY: break;
-              case RIGHT_KEY:
-              case LEFT_KEY:
-                  done = true;
-                  break;
+    switch(key) {
+       case NO_KEY: break;
+       case RIGHT_KEY:
+       case LEFT_KEY:
+       case SELECT_KEY:
+            break;
 
-              case UP_KEY:
-              case DOWN_KEY:
-                  tempVal = !tempVal;
-                  break;
+       case UP_KEY:
+       case DOWN_KEY:
+            s_runSoakTest = !s_runSoakTest;
+            break;
+    }
 
-              case SELECT_KEY:
-                  s_runSoakTest = tempVal;
-                  done= true;
-                  lcd.setCursor(0,1);
-                  lcd.write('*');
-                  delay(500);
-                  break;
-           }
-        }
+    lcd.setCursor(2,1);
+    if (s_runSoakTest) {
+       lcd.print("Soak: AUTO  ");
+    } else {
+       lcd.print("Soak: MANUAL");
+    }
 
-        errorCustom->code = ERROR_SUCCESS;
+    errorCustom->code = ERROR_SUCCESS;
 
     return error;
 }
@@ -289,49 +261,31 @@ PERROR config_SOAK( void *context, int  key)
 PERROR config_REPEAT( void *context, int  key)
 {
     PERROR error = errorCustom;
-    boolean done = false;
-    int tempVal = s_repeatSelectTimeInS;
-    int inch;
+    char tempBuf[16];
 
-	lcd.setCursor(2,1);
-        lcd.print("Repeat    s");
-        while(done != true) {
-	   lcd.setCursor(9,1);
-           if (tempVal<10) {
-             lcd.write(" ");
-           } else {
-             lcd.write(byte(0x30+tempVal/10));
-           }
-           lcd.write(byte(0x30+tempVal%10));
-           inch = readKey();
-           switch(inch) {
-              case NO_KEY: break;
-              case RIGHT_KEY:
-              case LEFT_KEY:
-                  done = true;
-                  break;
+    switch(key) {
+       case NO_KEY: break;
+       case RIGHT_KEY:
+       case LEFT_KEY:
+       case SELECT_KEY:
+            break;
 
-              case UP_KEY:
-                  if (tempVal<20)
-                      tempVal = tempVal+5;
-                  break;
+       case UP_KEY:
+            if (s_repeatSelectTimeInS<20)
+               s_repeatSelectTimeInS = s_repeatSelectTimeInS+5;
+            break;
 
-              case DOWN_KEY:
-                  if (tempVal>=5)
-                      tempVal = tempVal-5;
-                  break;
+       case DOWN_KEY:
+            if (s_repeatSelectTimeInS>=5)
+               s_repeatSelectTimeInS = s_repeatSelectTimeInS-5;
+            break;
+    }
 
-              case SELECT_KEY:
-                  s_repeatSelectTimeInS = tempVal;
-                  done= true;
-                  lcd.setCursor(0,1);
-                  lcd.write('*');
-                  delay(500);
-                  break;
-           }
-        }
+    lcd.setCursor(2,1);
+    sprintf(tempBuf,"Repeat %2.1d s",s_repeatSelectTimeInS);
+    lcd.print(tempBuf);
 
-        errorCustom->code = ERROR_SUCCESS;
+    errorCustom->code = ERROR_SUCCESS;
 
     return error;
 }
