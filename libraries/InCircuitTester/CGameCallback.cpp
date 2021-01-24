@@ -24,7 +24,6 @@
 //
 #include "CGameCallback.h"
 
-
 static const SELECTOR s_selectorGame[] = { //"0123456789abcdef"
                                             {"Bus Idle",        CGameCallback::onSelectBusIdle,        (void*) &CGameCallback::game, false},
                                             {"Bus Check",       CGameCallback::onSelectBusCheck,       (void*) &CGameCallback::game, false},
@@ -48,6 +47,7 @@ static const SELECTOR s_selectorGame[] = { //"0123456789abcdef"
                                             {"RAM Write All Hi",CGameCallback::onSelectRamWriteAllHi,  (void*) &CGameCallback::game, false},
                                             {"RAM Read All",    CGameCallback::onSelectRamReadAll,     (void*) &CGameCallback::game, false},
                                             {"Custom",          CGameCallback::onSelectCustom,         (void*) &CGameCallback::game, true},
+                                            {"Exit",            CGameCallback::reset, NULL, false},
                                             { 0, 0 }
                                          };
 
@@ -62,6 +62,7 @@ static const SELECTOR s_selectorGeneric[] = { //"0123456789abcdef"
                                                {"RAM Check RA",    CGameCallback::onSelectRamCheckRA,     (void*) &CGameCallback::game, true},
                                                {"RAM Check Ad",    CGameCallback::onSelectRamCheckAd,     (void*) &CGameCallback::game, true},
                                                {"RAM Write-Read",  CGameCallback::onSelectRamWriteRead,   (void*) &CGameCallback::game, true},
+                                               {"Exit",            CGameCallback::reset, NULL, false},
                                                { 0, 0 }
                                             };
 
@@ -76,6 +77,7 @@ static const SELECTOR s_selectorSoakTest[] = { //"0123456789abcdef"
                                                 {"RAM Write All AD",CGameCallback::onSelectRamWriteAllAD,  (void*) &CGameCallback::game, false},
                                                 {"RAM Write All Lo",CGameCallback::onSelectRamWriteAllLo,  (void*) &CGameCallback::game, false},
                                                 {"RAM Write All Hi",CGameCallback::onSelectRamWriteAllHi,  (void*) &CGameCallback::game, false},
+                                                {"Exit",            CGameCallback::reset, NULL, false},
                                                 { 0, 0 }
                                              };
 
@@ -325,5 +327,17 @@ CGameCallback::onSelectCustom(
     IGame *game = *((IGame **) iGame);
 
     return game->custom( key );
+}
+
+PERROR
+CGameCallback::reset(
+    void *iGame,
+    int  key
+)
+{
+   // Intentional Fault to cause a reset
+   // Fastest way to the root menu
+   void(* resetFunc) (void) = 0;
+   resetFunc();
 }
 

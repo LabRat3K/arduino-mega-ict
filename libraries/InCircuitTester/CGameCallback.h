@@ -173,6 +173,11 @@ class CGameCallback
             int  key
         );
 
+        static PERROR reset(
+            void *iGame,
+            int  key
+        );
+
 };
 
 #endif
