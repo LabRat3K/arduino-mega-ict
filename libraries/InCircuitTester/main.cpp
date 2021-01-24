@@ -46,7 +46,7 @@
 
 //
 //  See "keypad.h" to select between DFRobot Keypad, or 'simple GPIO input'
-//     See below for GPIO PIN definitions for inputs, 
+//     See below for GPIO PIN definitions for inputs,
 //     as well as for CONTRAST and RW  (could be connected direct to GND)
 //
 
@@ -102,9 +102,10 @@ static const UINT8 led = 13;
 static const SELECTOR *s_currentSelector;
 
 //
-// This is the game selector.
+// This is the game & configTable selector.
 //
 static SELECTOR *s_gameSelector;
+static SELECTOR *s_configSelector;
 
 //
 // This is the current selection.
@@ -133,21 +134,28 @@ bool s_repeatIgnoreError;
 #ifdef KEYPAD_TEST
    PERROR keypad_test ( void *context, int  key);
 #endif
+PERROR config_SOAK( void *context, int  key);
+PERROR config_REPEAT( void *context, int  key);
+PERROR config_ERROR( void *context, int  key);
+PERROR game_list( void *context, int key);
+
 //
 // The selector used for the general tester configuration options.
 //
-static const SELECTOR s_configSelector[] PROGMEM = {//0123456789abcde
-                                                    {"- Soak Test    ",  onSelectConfig, (void*) (&s_runSoakTest),           false},
-                                                    {"- Set Repeat   ",  onSelectConfig, (void*) (&s_repeatSelectTimeInS),   false},
-                                                    {"- Set Error    ",  onSelectConfig, (void*) (&s_repeatIgnoreError),     false},
+static const SELECTOR configSelector[] PROGMEM = {//0123456789abcde
+                                                    {"\xA5Soak Test    ",  config_SOAK,   NULL, false},
+                                                    {"\xA5Set Repeat   ",  config_REPEAT, NULL, false},
+                                                    {"\xA5Set Error    ",  config_ERROR,  NULL, false},
 #ifdef KEYPAD_TEST
-                                                    {"- Keypad Test  ",  keypad_test, NULL,     false},
+                                                    {"\xA5Keypad Test  ",  keypad_test,   NULL, false},
 #endif
+                                                    {"\xA5Game Select  ",  game_list,     NULL, false},
+
                                                     { 0, 0 }
                                                    };
 
 //
-// Handler for the Keypad Self-test 
+// Handler for the Keypad Self-test
 //
 #ifdef KEYPAD_TEST
 PERROR keypad_test ( void *context, int  key) {
@@ -178,68 +186,205 @@ PERROR keypad_test ( void *context, int  key) {
 }
 #endif
 
-
 //
-// Handler for the configuration callback to set options.
+// Handler for ERROR configuration setting.
 //
-PERROR
-onSelectConfig(
-    void *context,
-    int  key
-)
+PERROR config_ERROR( void *context, int  key)
 {
     PERROR error = errorCustom;
+    boolean done = false;
+    boolean tempVal = s_repeatIgnoreError;
+    int inch;
 
-    if (context == (void *) &s_repeatSelectTimeInS)
-    {
-        if (s_repeatSelectTimeInS == 0)
-        {
-            s_repeatSelectTimeInS = 5;
-        }
-        else if (s_repeatSelectTimeInS == 5)
-        {
-            s_repeatSelectTimeInS = 20;
-        }
-        else
-        {
-            s_repeatSelectTimeInS = 0;
-        }
+	lcd.setCursor(2,1);
+        lcd.print("On Err:");
+        while(done != true) {
+	   lcd.setCursor(10,1);
+           if (tempVal == false) {
+              lcd.print("Ignore");
+           }
+           else {
+              lcd.print("Stop  ");
+           }
+           inch = readKey();
+           switch(inch) {
+              case NO_KEY: break;
+              case RIGHT_KEY:
+              case LEFT_KEY:
+                  done = true;
+                  break;
 
-        errorCustom->description = String("OK: Repeat ") + String(s_repeatSelectTimeInS, DEC) + String("S");
-        errorCustom->code = ERROR_SUCCESS;
-    }
+              case UP_KEY:
+              case DOWN_KEY:
+                  tempVal = !tempVal;
+                  break;
 
-    if (context == (void *) &s_repeatIgnoreError)
-    {
-        if (s_repeatIgnoreError == false)
-        {
-            s_repeatIgnoreError = true;
-            errorCustom->description = "OK: Ignore err";
-        }
-        else
-        {
-            s_repeatIgnoreError = false;
-            errorCustom->description = "OK: Stop on err";
-        }
-
-        errorCustom->code = ERROR_SUCCESS;
-    }
-
-    if (context == (void *) &s_runSoakTest)
-    {
-        if (s_runSoakTest == false)
-        {
-            s_runSoakTest = true;
-            errorCustom->description = "OK: Soak Test";
-        }
-        else
-        {
-            s_runSoakTest = false;
-            errorCustom->description = "OK: Manual";
+              case SELECT_KEY:
+                  s_repeatIgnoreError = tempVal;
+                  done= true;
+                  lcd.setCursor(0,1);
+                  lcd.write('*');
+                  delay(500);
+                  break;
+           }
         }
 
         errorCustom->code = ERROR_SUCCESS;
-    }
+
+    return error;
+}
+
+//
+// Handler for SOAK configuration setting.
+//
+PERROR config_SOAK( void *context, int  key)
+{
+    PERROR error = errorCustom;
+    boolean done = false;
+    boolean tempVal = s_runSoakTest;
+    int inch;
+
+	lcd.setCursor(2,1);
+        lcd.print("Soak:");
+        while(done != true) {
+	   lcd.setCursor(8,1);
+           if (tempVal == false) {
+              lcd.print("Manual");
+           }
+           else {
+              lcd.print("Auto  ");
+           }
+           inch = readKey();
+           switch(inch) {
+              case NO_KEY: break;
+              case RIGHT_KEY:
+              case LEFT_KEY:
+                  done = true;
+                  break;
+
+              case UP_KEY:
+              case DOWN_KEY:
+                  tempVal = !tempVal;
+                  break;
+
+              case SELECT_KEY:
+                  s_runSoakTest = tempVal;
+                  done= true;
+                  lcd.setCursor(0,1);
+                  lcd.write('*');
+                  delay(500);
+                  break;
+           }
+        }
+
+        errorCustom->code = ERROR_SUCCESS;
+
+    return error;
+}
+
+
+//
+// Handler for the REPEAT configuration setting.
+//
+PERROR config_REPEAT( void *context, int  key)
+{
+    PERROR error = errorCustom;
+    boolean done = false;
+    int tempVal = s_repeatSelectTimeInS;
+    int inch;
+
+	lcd.setCursor(2,1);
+        lcd.print("Repeat    s");
+        while(done != true) {
+	   lcd.setCursor(9,1);
+           if (tempVal<10) {
+             lcd.write(" ");
+           } else {
+             lcd.write(byte(0x30+tempVal/10));
+           }
+           lcd.write(byte(0x30+tempVal%10));
+           inch = readKey();
+           switch(inch) {
+              case NO_KEY: break;
+              case RIGHT_KEY:
+              case LEFT_KEY:
+                  done = true;
+                  break;
+
+              case UP_KEY:
+                  if (tempVal<20)
+                      tempVal = tempVal+5;
+                  break;
+
+              case DOWN_KEY:
+                  if (tempVal>5)
+                      tempVal = tempVal-5;
+                  break;
+
+              case SELECT_KEY:
+                  s_repeatSelectTimeInS = tempVal;
+                  done= true;
+                  lcd.setCursor(0,1);
+                  lcd.write('*');
+                  delay(500);
+                  break;
+           }
+        }
+
+        errorCustom->code = ERROR_SUCCESS;
+
+    return error;
+}
+
+PERROR game_list( void *context, int  key)
+{
+    PERROR error = errorCustom;
+    boolean done = false;
+    unsigned short tempVal = 0;
+    int inch;
+
+        while(done != true) {
+	   lcd.setCursor(0,1);
+           lcd.print(s_gameSelector[tempVal].description);
+           inch = readKey();
+           switch(inch) {
+              case NO_KEY: break;
+              case RIGHT_KEY:
+              case LEFT_KEY:
+                  done = true;
+                  errorCustom->code = ERROR_SUCCESS;
+                  break;
+
+              case UP_KEY:
+                   if (s_gameSelector[tempVal+1].function != NULL)
+                     tempVal++;
+                  break;
+
+              case DOWN_KEY:
+                  if (tempVal>0)
+                     tempVal--;
+                  break;
+
+              case SELECT_KEY:
+		  lcd.setCursor(0,0);
+                  lcd.print("=== LAUNCH ? ===");
+                  inch = NO_KEY;
+                  done= true;
+                  while (inch==NO_KEY) inch = readKey();
+                  if (inch == SELECT_KEY) {
+                     s_currentSelection = tempVal; // Is this necessary?
+
+                      // * Need to invoke the "select game" callback from here...
+                       error = s_gameSelector[tempVal].function(
+                                  s_gameSelector[tempVal].context,
+                                  inch );
+                  } else {
+                     errorCustom->code = ERROR_SUCCESS;
+                  }
+                  break;
+           }
+        }
+
 
     return error;
 }
@@ -268,6 +413,11 @@ onSelectGameCallback(
     {
         free(s_gameSelector);
         s_gameSelector = NULL;
+    }
+    if (s_configSelector != NULL)
+    {
+        free(s_configSelector);
+        s_configSelector = NULL;
     }
 
     if (CGameCallback::game != NULL)
@@ -519,7 +669,7 @@ void splash_wait(void) {
       }
 }
 #else
-   // 
+   //
    //  No flashy animation (save code space)
    //
    #define BANNER_LEFT_CHAR byte(0xDF)
@@ -578,20 +728,21 @@ void mainSetup(
         UINT16 uGameRegionSize   = 0;
         UINT16 uGameIndexCount   = 0;
 
-        for ( ; pgm_read_word_near(&s_configSelector[uConfigIndexCount].function) != 0 ; uConfigIndexCount++) {}
+        for ( ; pgm_read_word_near(&configSelector[uConfigIndexCount].function) != 0 ; uConfigIndexCount++) {}
 
         for ( ; pgm_read_word_near(&gameSelector[uGameIndexCount].function) != 0 ; uGameIndexCount++) {}
 
-        uConfigRegionSize += sizeof(s_configSelector[0]) * uConfigIndexCount;
-        uGameRegionSize += sizeof(gameSelector[0]) * (uGameIndexCount+1); // +1 to include the null terminator.
+        uConfigRegionSize += sizeof(configSelector[0]) * (uConfigIndexCount+1); // +1 to include null terminator
+        uGameRegionSize   += sizeof(gameSelector[0])   * (uGameIndexCount+1);
 
-        s_gameSelector = (PSELECTOR) malloc( uConfigRegionSize + uGameRegionSize );
+        s_configSelector = (PSELECTOR) malloc( uConfigRegionSize );
+        s_gameSelector = (PSELECTOR) malloc( uGameRegionSize );
 
-        memcpy_P( &s_gameSelector[0], s_configSelector, uConfigRegionSize );
-        memcpy_P( &s_gameSelector[uConfigIndexCount], gameSelector, uGameRegionSize );
+        memcpy_P( &s_configSelector[0], configSelector, uConfigRegionSize );
+        memcpy_P( &s_gameSelector[0], gameSelector, uGameRegionSize );
     }
 
-    s_currentSelector = s_gameSelector;
+    s_currentSelector = s_configSelector;
 
     splash_wait();
 }
