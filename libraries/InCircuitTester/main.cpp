@@ -181,7 +181,7 @@ PERROR keypad_test ( void *context, int  key) {
        }
 
        // Pause if there is something to see
-       if (inch != NO_KEY) {
+       if (inch > NO_KEY) {
          delay(500);
        }
     }
