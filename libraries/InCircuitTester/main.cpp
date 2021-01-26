@@ -54,7 +54,7 @@
    //
    // Basic LCD diplay object (in this case, Sain 16 x 2).
    //
-   const int  rs=8, en=9, d4=5, d5=5, d6=6, d7=7;
+   const int  rs=8, en=9, d4=4, d5=5, d6=6, d7=7;
 
    // Function prototype for retrieving keypress token
    #define readKey() keypad.getKey()
@@ -202,6 +202,7 @@ PERROR config_ERROR( void *context, int  key)
        case RIGHT_KEY:
        case LEFT_KEY:
        case SELECT_KEY:
+       case SAMPLE_WAIT:
             break;
 
        case UP_KEY:
@@ -234,6 +235,7 @@ PERROR config_SOAK( void *context, int  key)
        case RIGHT_KEY:
        case LEFT_KEY:
        case SELECT_KEY:
+       case SAMPLE_WAIT:
             break;
 
        case UP_KEY:
@@ -268,6 +270,7 @@ PERROR config_REPEAT( void *context, int  key)
        case RIGHT_KEY:
        case LEFT_KEY:
        case SELECT_KEY:
+       case SAMPLE_WAIT:
             break;
 
        case UP_KEY:
@@ -324,7 +327,7 @@ PERROR game_list( void *context, int  key)
                   lcd.print("=== LAUNCH ? ===");
                   inch = NO_KEY;
                   done= true;
-                  while (inch==NO_KEY) inch = readKey();
+                  while (inch<=NO_KEY) inch = readKey();
                   if (inch == SELECT_KEY) {
                      s_currentSelection = tempVal; // Is this necessary?
 
@@ -639,12 +642,10 @@ void splash_wait(void) {
    }
 #endif
 
-
 void mainSetup(
     const SELECTOR *gameSelector
 )
 {
-
 #ifdef LCD_PIN_RW
     // Setup the RW pins (must occur before lcd.begin
     pinMode(LCD_PIN_RW,OUTPUT);
