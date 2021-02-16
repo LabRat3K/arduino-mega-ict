@@ -35,7 +35,7 @@
 //
 // Uncomment to add KEYPAD_TEST to the config menu options
 //
-// #define KEYPAD_TEST
+//#define KEYPAD_TEST
 
 // Comment out to use basic GPIO keypad
 #define USE_DFR_KEY
@@ -54,10 +54,6 @@
    static DFR_Key keypad;
 #else
    #include <gpio_key.h>
-   //
-   //     See gpio_pin.cpp for GPIO PIN definitions for inputs, 
-   //     as well as for CONTRAST and RW  (could be connected direct to GND)
-   //
    //
    // Custom LCD configuration - update these pin definitions
    //
