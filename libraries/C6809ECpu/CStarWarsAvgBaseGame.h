@@ -26,7 +26,7 @@
 #define CStarWarsAvgBaseGame_h
 
 #include "CGame.h"
-
+#include "CCapture.h"
 
 class CStarWarsAvgBaseGame : public CGame
 {
@@ -35,6 +35,50 @@ class CStarWarsAvgBaseGame : public CGame
         //
         // CStarWarsAvgBaseGame
         //
+
+        static PERROR vgRst(
+            void *context
+        );
+
+        static PERROR loadHALT(
+            void *context
+        );
+
+        static PERROR loadVCTR(
+            void *context
+        );
+
+        static PERROR loadSTAT(
+            void *context
+        );
+
+        static PERROR loadSCAL(
+            void *context
+        );
+
+        static PERROR loadCNTR(
+            void *context
+        );
+
+        static PERROR loadAll(
+            void *context
+        );
+
+        static PERROR vgGo(
+            void *context
+        );
+
+        static PERROR capture32(
+            void *context
+        );
+
+        static PERROR rstGoCap32(
+            void *context
+        );
+
+        static PERROR runToHalt(
+            void *context
+        );
 
     protected:
 
@@ -45,7 +89,15 @@ class CStarWarsAvgBaseGame : public CGame
         ~CStarWarsAvgBaseGame(
         );
 
+        static PERROR load(
+            void   *context,
+            UINT8   dataLen,
+            UINT16 *data
+        );
+
     private:
+
+        CCapture *m_capture;
 
 };
 

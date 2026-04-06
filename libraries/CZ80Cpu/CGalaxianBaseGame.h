@@ -53,6 +53,13 @@ class CGalaxianBaseGame : public CGame
             void *context
         );
 
+        //
+        // Custom function for testing the effect of writes in the ROM region
+        //
+        static PERROR romWriteTest(
+            void *context
+        );
+
     protected:
 
         CGalaxianBaseGame(

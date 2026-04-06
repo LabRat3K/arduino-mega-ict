@@ -26,20 +26,27 @@
 #include <CBuckRogersGame.h>
 #include <CCrazyKongGame.h>
 #include <CDambustersGame.h>
+#include <CEyesGame.h>
 #include <CFitterGame.h>
+#include <CFitterSoundGame.h>
+#include <CFroggerGame.h>
 #include <CGalaxianGame.h>
 #include <CGyrussSoundGame.h>
 #include <CHustlerGame.h>
 #include <CHustlerSoundGame.h>
+#include <CHyperSportsSoundGame.h>
 #include <CJackrabbitGame.h>
 #include <CLadybugGame.h>
 #include <CMegaZoneSoundGame.h>
 #include <CPuckmanGame.h>
 #include <CRallyXGame.h>
+#include <CScorpionGame.h>
+#include <CScorpionSoundGame.h>
 #include <CScrambleGame.h>
 #include <CScrambleSoundGame.h>
 #include <CSuperCobraGame.h>
 #include <CSuperCobraSoundGame.h>
+#include <CUniwarsGame.h>
 #include <CZaxxonGame.h>
 
 //
@@ -56,13 +63,17 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Crazy K. P2( 1)",  onSelectGame,    (void*) (CCrazyKongGame::createInstancePt2Set1),             false},
                                                   {"Crazy K. P2(Z1)",  onSelectGame,    (void*) (CCrazyKongGame::createInstancePt2ZacSet1),          false},
                                                   {"Dambusters(UK1)",  onSelectGame,    (void*) (CDambustersGame::createInstanceUKSet1),             false},
+                                                  {"Eyes       (Z1)",  onSelectGame,    (void*) (CEyesGame::createInstanceZacSet1),                  false},
                                                   {"Fitter    (KD1)",  onSelectGame,    (void*) (CFitterGame::createInstanceKagaDenshiSet1),         false},
                                                   {"Fitter     (T1)",  onSelectGame,    (void*) (CFitterGame::createInstanceTaitoSet1),              false},
+                                                  {"Fitter     S(1)",  onSelectGame,    (void*) (CFitterSoundGame::createInstanceSet1),              false},
+                                                  {"Frogger   (SS1)",  onSelectGame,    (void*) (CFroggerGame::createInstanceSegaSet1),              false},
                                                   {"Galaxian   (M1)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet1),                 false},
                                                   {"Galaxian   (M2)",  onSelectGame,    (void*) (CGalaxianGame::createInstanceSet2),                 false},
                                                   {"Gyruss    S(S1)",  onSelectGame,    (void*) (CGyrussSoundGame::createInstanceSet1),              false},
                                                   {"Hustler   (ZS2)",  onSelectGame,    (void*) (CHustlerGame::createInstanceZacScramConvSet2),      false},
                                                   {"Hustler  S(ZS2)",  onSelectGame,    (void*) (CHustlerSoundGame::createInstanceZacScramConvSet2), false},
+                                                  {"Hyper Sp  S(S1)",  onSelectGame,    (void*) (CHyperSportsSoundGame::createInstanceSet1),              false},
                                                   {"Jackrabbit  (1)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet1),               false},
                                                   {"Jackrabbit  (2)",  onSelectGame,    (void*) (CJackrabbitGame::createInstanceSet2),               false},
                                                   {"Ladybug        ",  onSelectGame,    (void*) (CLadybugGame::createInstanceSet1),                  false},
@@ -71,6 +82,10 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"Puckman    (B1)",  onSelectGame,    (void*) (CPuckmanGame::createInstanceBSet1),                 false},
                                                   {"Rally-X(Midway)",  onSelectGame,    (void*) (CRallyXGame::createInstanceSet2),                   false},
                                                   {"Rally-X (Namco)",  onSelectGame,    (void*) (CRallyXGame::createInstanceSet1),                   false},
+                                                  {"Scorpion  (S1 )",  onSelectGame,    (void*) (CScorpionGame::createInstanceSet1),                 false},
+                                                  {"Scorpion  (S2 )",  onSelectGame,    (void*) (CScorpionGame::createInstanceSet2),                 false},
+                                                  {"Scorpion  (S2A)",  onSelectGame,    (void*) (CScorpionGame::createInstanceSet2A),                false},
+                                                  {"Scorpion  S(S1)",  onSelectGame,    (void*) (CScorpionSoundGame::createInstanceSet1),            false},
                                                   {"Scramble   (S1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceSet1),                 false},
                                                   {"Scramble  S(S1)",  onSelectGame,    (void*) (CScrambleSoundGame::createInstanceSet1),            false},
                                                   {"Scramble   (Z1)",  onSelectGame,    (void*) (CScrambleGame::createInstanceZacSet1),              false},
@@ -78,6 +93,7 @@ static const SELECTOR s_gameSelector[] PROGMEM = {//0123456789abcde
                                                   {"S. Cobra   (K1)",  onSelectGame,    (void*) (CSuperCobraGame::createInstanceKonamiSet1),         false},
                                                   {"S. Cobra   (S1)",  onSelectGame,    (void*) (CSuperCobraGame::createInstanceSternSet1),          false},
                                                   {"S. Cobra  S(S1)",  onSelectGame,    (void*) (CSuperCobraSoundGame::createInstanceSternSet1),     false},
+                                                  {"Uniwars     (1)",  onSelectGame,    (void*) (CUniwarsGame::createInstanceSet1),                   false},
                                                   {"Zaxxon      (1)",  onSelectGame,    (void*) (CZaxxonGame::createInstanceSet1),                   false},
                                                   {"Zaxxon      (2)",  onSelectGame,    (void*) (CZaxxonGame::createInstanceSet2),                   false},
                                                   {"Zaxxon      (3)",  onSelectGame,    (void*) (CZaxxonGame::createInstanceSet3),                   false},

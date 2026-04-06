@@ -42,8 +42,9 @@ class CPuckmanBaseGame : public CGame
     protected:
 
         CPuckmanBaseGame(
-            const ROM_DATA2N *romData2n,
-            const ROM_REGION *romRegion
+            const ROM_DATA2N  *romData2n,
+            const ROM_REGION  *romRegion,
+            DataRemapCallback  dataRemapCallback = NO_DATA_REMAP
         );
 
         ~CPuckmanBaseGame(
