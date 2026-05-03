@@ -584,7 +584,7 @@ CGame::inputRead(
 {
     PERROR error = errorSuccess;
 
-    if (key == DOWN_KEY)
+    if (key == UP_KEY)
     {
         if (m_inputReadRegion > 0)
         {
@@ -592,7 +592,7 @@ CGame::inputRead(
         }
     }
 
-    if (key == UP_KEY)
+    if (key == DOWN_KEY)
     {
         if (m_inputRegion[m_inputReadRegion+1].mask != 0)
         {
@@ -647,7 +647,7 @@ CGame::outputWrite(
 {
     PERROR error = errorSuccess;
 
-    if (key == DOWN_KEY)
+    if (key == UP_KEY)
     {
         if (m_outputWriteRegion > 0)
         {
@@ -655,7 +655,7 @@ CGame::outputWrite(
         }
     }
 
-    if (key == UP_KEY)
+    if (key == DOWN_KEY)
     {
         if (m_outputRegion[m_outputWriteRegion+1].activeMask != 0)
         {
@@ -740,7 +740,7 @@ CGame::onRomKeyMove(
 {
     PERROR error = errorSuccess;
 
-    if (key == DOWN_KEY)
+    if (key == UP_KEY)
     {
         if (m_RomReadRegion > 0)
         {
@@ -748,7 +748,7 @@ CGame::onRomKeyMove(
         }
     }
 
-    if (key == UP_KEY)
+    if (key == DOWN_KEY)
     {
         if (m_romRegion[m_RomReadRegion+1].length != 0)
         {
@@ -791,7 +791,7 @@ CGame::onRamKeyMove(
 {
     PERROR error = errorSuccess;
 
-    if (key == DOWN_KEY)
+    if (key == UP_KEY)
     {
         if (m_RamWriteReadRegion > 0)
         {
@@ -799,7 +799,7 @@ CGame::onRamKeyMove(
         }
     }
 
-    if (key == UP_KEY)
+    if (key == DOWN_KEY)
     {
         if (m_ramRegion[m_RamWriteReadRegion+1].end != 0)
         {
@@ -842,7 +842,7 @@ CGame::onRamByteKeyMove(
 {
     PERROR error = errorSuccess;
 
-    if (key == DOWN_KEY)
+    if (key == UP_KEY)
     {
         if (m_RamWriteReadByteRegion > 0)
         {
@@ -850,7 +850,7 @@ CGame::onRamByteKeyMove(
         }
     }
 
-    if (key == UP_KEY)
+    if (key == DOWN_KEY)
     {
         if (m_ramRegionByteOnly[m_RamWriteReadByteRegion+1].end != 0)
         {
@@ -893,7 +893,7 @@ CGame::onCustomKeyMove(
 {
     PERROR error = errorSuccess;
 
-    if (key == DOWN_KEY)
+    if (key == UP_KEY)
     {
         if (m_customSelect > 0)
         {
@@ -901,7 +901,7 @@ CGame::onCustomKeyMove(
         }
     }
 
-    if (key == UP_KEY)
+    if (key == DOWN_KEY)
     {
         if (m_customFunction[m_customSelect+1].function != NULL)
         {

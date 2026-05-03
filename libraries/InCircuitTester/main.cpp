@@ -312,12 +312,12 @@ PERROR game_list( void *context, int  key)
                   errorCustom->code = ERROR_SUCCESS;
                   break;
 
-              case UP_KEY:
+              case DOWN_KEY:
                    if (s_gameSelector[tempVal+1].function != NULL)
                      tempVal++;
                   break;
 
-              case DOWN_KEY:
+              case UP_KEY:
                   if (tempVal>0)
                      tempVal--;
                   break;
@@ -610,19 +610,23 @@ void splash_page(void) {
 
 void splash_wait(void) {
    int i =0;
+   unsigned long ticker = millis();
       // EYE CANDY OPENING
       lcd.setCursor(0,1);
       lcd.print(" <PRESS SELECT>");
       i=0;
-      while (readKey() != SELECT_KEY) {
-         i++;
-         lcd.setCursor(0,0);
-         lcd.write(byte((i%2)*2));
-         lcd.write(byte(((i%2)*2)+1) );
-         lcd.setCursor(14,0);
-         lcd.write(byte((i%2)*2));
-         lcd.write(byte(((i%2)*2)+1));
-         delay(500);
+      while (readKey() <= NO_KEY) {
+         if (millis() > ticker+500) {
+            i++;
+            lcd.setCursor(0,0);
+            lcd.write(byte((i%2)*2));
+            lcd.write(byte(((i%2)*2)+1) );
+            lcd.setCursor(14,0);
+            lcd.write(byte((i%2)*2));
+            lcd.write(byte(((i%2)*2)+1));
+            ticker = millis();
+         }
+         //delay(500);
       }
 }
 #else

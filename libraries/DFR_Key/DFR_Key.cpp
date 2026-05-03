@@ -28,10 +28,10 @@ static int DEFAULT_THRESHOLD = 20;
 	static int NOKEY_ARV	= 1023;
 #else
 	static int RIGHTKEY_ARV = 0;
-	static int UPKEY_ARV	= 144;
-	static int DOWNKEY_ARV	= 329;
-	static int LEFTKEY_ARV	= 505;
-	static int SELKEY_ARV	= 742;
+	static int UPKEY_ARV	= 130;
+	static int DOWNKEY_ARV	= 304;
+	static int LEFTKEY_ARV	= 478;
+	static int SELKEY_ARV	= 720; //742;
 	static int NOKEY_ARV	= 1023;
 #endif
 
@@ -55,7 +55,7 @@ int DFR_Key::getKey()
     _prevInput = _curInput;
     _curInput = analogRead(_keyPin);
 
-    if (_curInput == _prevInput)
+    if ((_curInput <= _prevInput+5) && (_curInput>=_prevInput-5))
     {
       _change = false;
       _curKey = _prevKey;
